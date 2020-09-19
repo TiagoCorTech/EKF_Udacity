@@ -1,7 +1,11 @@
 #include "kalman_filter.h"
+#include <math.h>
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+
+#define PI 3.14159265
 
 /* 
  * Please note that the Eigen library does not initialize 
@@ -27,6 +31,7 @@ void KalmanFilter::Predict() {
    * TODO: predict the state
    */
   x_ = F_ * x_;
+  P_ =  F_ * P_ *F_.transpose() + Q_;
   
   
 }
@@ -53,7 +58,28 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
    * TODO: update the state by using Extended Kalman Filter equations
    */
   
-  VectorXd y = z - H_ * x_;
+  VectorXd Hx(3);
+  
+  double p_x = x_(0);
+  double p_y = x_(1);
+  double v_x = x_(2);
+  double v_y = x_(3);
+  
+  Hx(0) = sqrt(p_x*p_x + p_y*p_y );
+  Hx(1) = atan2(p_y,p_x);
+  Hx(2) = (p_x*v_x+p_y*v_y)/(sqrt(p_x*p_x + p_y*p_y));
+  
+  
+  VectorXd y = z - Hx;
+  
+  if(y(1) >= PI){
+    y(1) = y(1) - 2*PI;
+  }
+  
+  if(y(1) <= - PI){
+    y(1) = y(1) + 2*PI;
+  }
+  
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd K = P_ * Ht * S.inverse();
