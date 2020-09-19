@@ -55,6 +55,7 @@ int main() {
         string event = j[0].get<string>();
         
         if (event == "telemetry") {
+          
           // j[1] is the data JSON object
           string sensor_measurement = j[1]["sensor_measurement"];
           
@@ -112,7 +113,8 @@ int main() {
 
           // Push the current estimated x,y positon from the Kalman filter's 
           //   state vector
-
+		  
+          
           VectorXd estimate(4);
 
           double p_x = fusionEKF.ekf_.x_(0);
@@ -137,7 +139,7 @@ int main() {
           msgJson["rmse_vx"] = RMSE(2);
           msgJson["rmse_vy"] = RMSE(3);
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
-          // std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 
         }  // end "telemetry" if
